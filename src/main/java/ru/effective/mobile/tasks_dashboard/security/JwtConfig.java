@@ -79,7 +79,7 @@ public class JwtConfig {
                 .claim("roles", roles)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .signWith(key, SignatureAlgorithm.HS512) // Новое API
+                .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
 
@@ -88,20 +88,15 @@ public class JwtConfig {
         return validateToken(token, accessKey);
     }
 
-    // Проверка Refresh Token
-    public boolean validateRefreshToken(String token) {
-        return validateToken(token, refreshKey);
-    }
-
     private boolean validateToken(String token, SecretKey key) {
         try {
-            Jwts.parser() // Новое API
+            Jwts.parser()
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            logger.warn("Invalid JWT token: {}", e.getMessage());
+            logger.warn("Некорректный JWT токен: {}", e.getMessage());
             return false;
         }
     }

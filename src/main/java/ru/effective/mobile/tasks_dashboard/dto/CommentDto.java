@@ -9,8 +9,8 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CommentDto {
 
-    private UUID id;
+    private long id;
     private String text;
-    private UUID authorId;
-    private UUID taskId;
+    private UserDto authorDto;
+    private TaskDto taskDto;
 }

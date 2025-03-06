@@ -1,9 +1,11 @@
 package ru.effective.mobile.tasks_dashboard.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.effective.mobile.tasks_dashboard.exception.EmailAlreadyInUseException;
 import ru.effective.mobile.tasks_dashboard.exception.UserAlreadyHaveAssignedRoleException;
 import ru.effective.mobile.tasks_dashboard.exception.UserNotFoundException;
 import ru.effective.mobile.tasks_dashboard.model.Role;
@@ -11,19 +13,27 @@ import ru.effective.mobile.tasks_dashboard.model.User;
 import ru.effective.mobile.tasks_dashboard.repository.UserRepository;
 
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Autowired
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public User createUser(User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new EmailAlreadyInUseException("Указанный email уже используется.");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(Set.of(Role.ROLE_USER));
         return userRepository.save(user);
     }
 
@@ -32,23 +42,23 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUserById(UUID userId) {
+    public void deleteUserById(long userId) {
         if (!userRepository.existsById(userId)) {
-            throw new UserNotFoundException("User not found with ID: " + userId);
+            throw new UserNotFoundException("Пользователь с id : " + userId + " не найден.");
         }
         userRepository.deleteById(userId);
     }
 
     @Transactional
-    public void addRoleToUser(UUID userId, Role role) {
+    public void addRoleToUser(long userId, Role role) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с id : " + userId + " не найден."));
 
         if (!user.getRoles().contains(role)) {
             user.getRoles().add(role);
             userRepository.save(user);
         } else {
-            throw new UserAlreadyHaveAssignedRoleException("User already have assigned role: " + role);
+            throw new UserAlreadyHaveAssignedRoleException("У пользователя уже есть эта роль : " + role);
         }
     }
 
@@ -63,41 +73,38 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Set<Role> getUserRolesByUUID(UUID userId) {
+    public Set<Role> getUserRolesByUserId(long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с id : " + userId + " не найден."));
         return user.getRoles();
     }
 
     @Transactional(readOnly = true)
     public Set<Role> getUserRolesByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с email : " + email + " не найден."));
         return user.getRoles();
     }
 
     @Transactional(readOnly = true)
-    public boolean hasRole(UUID userId, Role role) {
+    public boolean hasRole(long userId, Role role) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с id : " + userId + " не найден."));
         return user.getRoles().contains(role);
     }
 
     @Transactional
-    public void removeRoleFromUser(UUID userId, Role role) {
+    public void removeRoleFromUser(long userId, Role role) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
-
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с id : " + userId + " не найден."));
         if (role == Role.ROLE_USER) {
-            throw new IllegalArgumentException("Cannot remove the default ROLE_USER");
+            throw new IllegalArgumentException("Невозможно удалить роль по-умолчанию : ROLE_USER");
         }
-
-        // Удаляем роль, если она существует у пользователя
         if (user.getRoles().contains(role)) {
             user.getRoles().remove(role);
             userRepository.save(user);
         } else {
-            throw new IllegalArgumentException("Role " + role + " is not assigned to the user");
+            throw new IllegalArgumentException("Роли " + role + " нет у данного пользователя");
         }
     }
 }
