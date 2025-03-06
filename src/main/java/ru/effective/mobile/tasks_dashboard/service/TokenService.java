@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.effective.mobile.tasks_dashboard.exception.IllegalJwtTokenException;
 import ru.effective.mobile.tasks_dashboard.exception.UserNotFoundException;
 import ru.effective.mobile.tasks_dashboard.model.Role;
 import ru.effective.mobile.tasks_dashboard.security.JwtConfig;
@@ -47,26 +48,20 @@ public class TokenService {
     }
 
     public Map<String, String>  refreshAccessToken(String refreshToken) throws UserNotFoundException {
-        // Проверяем валидность Refresh Token
         if (!tokenRedisService.isRefreshTokenValid(refreshToken)) {
-            throw new IllegalArgumentException("Invalid or expired refresh token");
+            throw new IllegalJwtTokenException("Некорректный или просроченный токен.");
         }
-
-        // Проверяем, не был ли токен уже использован
         if (tokenRedisService.isTokenUsed(refreshToken)) {
-            throw new IllegalArgumentException("Token has already been used");
+            throw new IllegalJwtTokenException("Токен уже использовался.");
         }
-
-        // Получаем email пользователя из Redis
         String email = tokenRedisService.getUserEmailFromRefreshToken(refreshToken);
         if (email == null || email.isEmpty()) {
-            throw new IllegalArgumentException("Invalid email in refresh token");
+            throw new IllegalJwtTokenException("Некорректный email в токене.");
         }
 
         Set<String> roles = userService.getConvertedRoles(userService.getUserRolesByEmail(email));
         String newAccessToken = jwtConfig.generateAccessToken(email, roles);
         String newRefreshToken = jwtConfig.generateRefreshToken(email);
-
 
         tokenRedisService.saveRefreshToken(
                 newRefreshToken,
@@ -77,11 +72,9 @@ public class TokenService {
         //used + revoke в т.ч. для сценариев утечки и удаления из Redis.
         tokenRedisService.markTokenAsUsed(refreshToken);
         tokenRedisService.revokeRefreshToken(refreshToken);
-
         Map<String, String> tokenMap = new HashMap<>();
         tokenMap.put("access_token", newAccessToken);
         tokenMap.put("refresh_token", newRefreshToken);
-
         return tokenMap;
     }
 }

@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface TaskRepository extends JpaRepository<Task, UUID>, JpaSpecificationExecutor<Task> {
+public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificationExecutor<Task> {
 
     //todo позже добавить методы для расширенной фильтрации (если нужно)
-    List<Task> findByAuthorId(UUID authorId);
-    List<Task> findByExecutorId(UUID executorId);
+    List<Task> findByAuthorId(Long authorId);
+    List<Task> findByExecutorId(Long executorId);
 }

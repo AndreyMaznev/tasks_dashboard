@@ -34,6 +34,7 @@ public class TokenRedisService {
         }
 
         Boolean hasKey = redisTemplate.hasKey(refreshToken);
+        //Сравнение с TRUE если Redis вернет null
         if (!Boolean.TRUE.equals(hasKey)) {
             return false; // Ключ не существует
         }

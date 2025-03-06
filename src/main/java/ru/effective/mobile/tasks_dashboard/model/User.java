@@ -1,7 +1,6 @@
 package ru.effective.mobile.tasks_dashboard.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import lombok.*;
 
 import java.util.HashSet;
@@ -18,10 +17,10 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column (name = "user_id")
+    private long id;
 
-    @Email
     @Column(name = "email")
     private String email;
 
@@ -34,6 +33,11 @@ public class User {
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>();
+
+    public User(String password, String email) {
+        this.password = password;
+        this.email = email;
+    }
 
     //Для всех новых юзеров изначально устанавливаем роль - USER вызовом этого метода
     public void setDefaultRole (){

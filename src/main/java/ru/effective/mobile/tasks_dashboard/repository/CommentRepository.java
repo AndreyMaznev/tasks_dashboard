@@ -8,6 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface CommentRepository extends JpaRepository<Comment, UUID> {
-    List<Comment> findByTaskId(UUID taskId);
+public interface CommentRepository extends JpaRepository<Comment, Long> {
+    List<Comment> findByTaskId(Long taskId);
 }

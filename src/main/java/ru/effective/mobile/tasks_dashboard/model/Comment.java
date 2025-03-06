@@ -15,9 +15,9 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Comment {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column (name = "id")
-    private UUID id;
+    private long id;
 
     @Column(name = "text", nullable = false)
     private String text;
