@@ -6,6 +6,6 @@ import ru.effective.mobile.tasks_dashboard.model.Task;
 
 @Mapper
 public interface TaskMapper {
-    Task dtoToEntity(TaskDto dto);
-    TaskDto entityToDto(Task task);
+    Task taskDtoToTask(TaskDto dto);
+    TaskDto taskToTaskDto(Task task);
 }

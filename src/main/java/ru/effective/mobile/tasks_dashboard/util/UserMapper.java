@@ -6,6 +6,6 @@ import ru.effective.mobile.tasks_dashboard.model.User;
 
 @Mapper
 public interface UserMapper {
-     User dtoToEntity(UserDto dto);
-     UserDto entityToDto(User user);
+     User userDtoToUser(UserDto dto);
+     UserDto userToUserDto(User user);
 }

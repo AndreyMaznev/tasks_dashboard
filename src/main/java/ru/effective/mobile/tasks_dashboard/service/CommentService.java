@@ -1,6 +1,5 @@
 package ru.effective.mobile.tasks_dashboard.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -9,12 +8,9 @@ import ru.effective.mobile.tasks_dashboard.exception.CommentNotFoundException;
 import ru.effective.mobile.tasks_dashboard.exception.CommentUpdateException;
 import ru.effective.mobile.tasks_dashboard.model.Comment;
 import ru.effective.mobile.tasks_dashboard.model.Role;
-import ru.effective.mobile.tasks_dashboard.model.Task;
 import ru.effective.mobile.tasks_dashboard.model.User;
 import ru.effective.mobile.tasks_dashboard.repository.CommentRepository;
 import ru.effective.mobile.tasks_dashboard.util.CommentMapper;
-
-import java.util.List;
 
 @Service
 public class CommentService {
@@ -32,10 +28,10 @@ public class CommentService {
 
     public CommentDto createComment(Long taskId, CommentDto commentDto, User currentUser) {
         taskService.checkTaskIsExists(taskId);
-        Comment comment = commentMapper.dtoToEntity(commentDto);
+        Comment comment = commentMapper.commentDtoToComment(commentDto);
         comment.setTask(taskService.getTaskById(taskId));
         comment.setAuthor(currentUser);
-        return commentMapper.entityToDto(commentRepository.save(comment));
+        return commentMapper.commentToCommentDto(commentRepository.save(comment));
     }
 
     public CommentDto updateComment(Long taskId, Long commentId, CommentDto commentDto, User currentUser) {
@@ -48,7 +44,7 @@ public class CommentService {
             throw new CommentUpdateException("Ошибка при редактировании комментария (Некорректный ID).");
         }
         comment.setText(commentDto.getText());
-        return commentMapper.entityToDto(commentRepository.save(comment));
+        return commentMapper.commentToCommentDto(commentRepository.save(comment));
     }
 
     public void deleteComment(Long taskId, Long commentId, User currentUser) {
