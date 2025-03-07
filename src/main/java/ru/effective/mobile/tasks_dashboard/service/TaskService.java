@@ -31,7 +31,7 @@ public class TaskService {
     }
 
     public Page<TaskDto> getAllTasks(Pageable pageable) {
-        return taskRepository.findAll(pageable).map(taskMapper::entityToDto);
+        return taskRepository.findAll(pageable).map(taskMapper::taskToTaskDto);
     }
 
     public Task getTaskById(long taskId) {
@@ -41,7 +41,7 @@ public class TaskService {
     public TaskDto getTaskDtoById(long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException("Задача с ID " + taskId + " не найдена"));
-        return taskMapper.entityToDto(task);
+        return taskMapper.taskToTaskDto(task);
     }
 
     public TaskDto createTask(TaskDto taskDto, User currentUser) {
@@ -50,9 +50,9 @@ public class TaskService {
         if (!isAdmin) {
             throw new AccessDeniedException("Создавать задачи могут только администраторы.");
         }
-        Task task = taskMapper.dtoToEntity(taskDto);
+        Task task = taskMapper.taskDtoToTask(taskDto);
         task.setAuthor(currentUser);
-        return taskMapper.entityToDto(taskRepository.save(task));
+        return taskMapper.taskToTaskDto(taskRepository.save(task));
     }
 
     public TaskDto updateTask(Long taskId, TaskDto taskDto, User currentUser) {
@@ -65,7 +65,7 @@ public class TaskService {
         task.setDescription(taskDto.getDescription());
         User executor = userService.getUserByEmail(taskDto.getExecutor().getEmail());
         task.setExecutor(executor);
-        return taskMapper.entityToDto(taskRepository.save(task));
+        return taskMapper.taskToTaskDto(taskRepository.save(task));
     }
 
     public void deleteTask(Long taskId, User currentUser) {

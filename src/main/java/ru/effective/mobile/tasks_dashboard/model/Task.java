@@ -20,7 +20,7 @@ import java.util.UUID;
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column (name = "id")
+    @Column (name = "task_id")
     private long id;
 
     @Column(name = "title", nullable = false)

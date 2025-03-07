@@ -7,6 +7,6 @@ import ru.effective.mobile.tasks_dashboard.model.Comment;
 
 @Mapper
 public interface CommentMapper {
-    Comment dtoToEntity(CommentDto dto);
-    CommentDto entityToDto(Comment comment);
+    Comment commentDtoToComment(CommentDto dto);
+    CommentDto commentToCommentDto(Comment comment);
 }
