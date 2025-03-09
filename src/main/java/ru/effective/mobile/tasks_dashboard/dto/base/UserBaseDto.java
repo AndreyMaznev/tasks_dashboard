@@ -1,26 +1,23 @@
-package ru.effective.mobile.tasks_dashboard.dto;
+package ru.effective.mobile.tasks_dashboard.dto.base;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.effective.mobile.tasks_dashboard.model.Role;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
+public abstract class UserBaseDto {
 
-    @Email
+    @Email(message = "Некорректный email")
     private String email;
-    @NotNull
+
+    @NotNull(message = "Пароль является обязательным полем")
     private String password;
+
     private String username;
 }

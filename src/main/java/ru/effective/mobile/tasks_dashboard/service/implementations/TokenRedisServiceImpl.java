@@ -1,22 +1,23 @@
-package ru.effective.mobile.tasks_dashboard.service;
+package ru.effective.mobile.tasks_dashboard.service.implementations;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import ru.effective.mobile.tasks_dashboard.service.interfaces.TokenRedisService;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class TokenRedisService {
+public class TokenRedisServiceImpl implements TokenRedisService {
 
     private final StringRedisTemplate redisTemplate;
-    private static final Logger logger = LoggerFactory.getLogger(TokenRedisService.class);
+    private static final Logger logger = LoggerFactory.getLogger(TokenRedisServiceImpl.class);
 
     @Autowired
-    public TokenRedisService(StringRedisTemplate redisTemplate) {
+    public TokenRedisServiceImpl(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 

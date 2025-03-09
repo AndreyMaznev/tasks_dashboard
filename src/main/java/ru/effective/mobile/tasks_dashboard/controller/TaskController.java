@@ -13,11 +13,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import ru.effective.mobile.tasks_dashboard.dto.CommentDto;
-import ru.effective.mobile.tasks_dashboard.dto.TaskDto;
+import ru.effective.mobile.tasks_dashboard.dto.*;
+import ru.effective.mobile.tasks_dashboard.dto.TaskInputDto;
+import ru.effective.mobile.tasks_dashboard.dto.TaskOutputDto;
 import ru.effective.mobile.tasks_dashboard.model.User;
-import ru.effective.mobile.tasks_dashboard.service.CommentService;
-import ru.effective.mobile.tasks_dashboard.service.TaskService;
+import ru.effective.mobile.tasks_dashboard.service.implementations.CommentServiceImpl;
+import ru.effective.mobile.tasks_dashboard.service.implementations.TaskServiceImpl;
 
 
 @RestController
@@ -25,8 +26,8 @@ import ru.effective.mobile.tasks_dashboard.service.TaskService;
 @RequiredArgsConstructor
 public class TaskController {
 
-    private final TaskService taskService;
-    private final CommentService commentService;
+    private final TaskServiceImpl taskServiceImpl;
+    private final CommentServiceImpl commentServiceImpl;
 
     @GetMapping
     @Operation(
@@ -34,11 +35,11 @@ public class TaskController {
             description = "Возвращает список всех задач с пагинацией. Параметры page и size определяют номер страницы и количество элементов на странице."
     )
     @ApiResponse(responseCode = "200", description = "Успешно получены задачи.")
-    public ResponseEntity<Page<TaskDto>> getAllTasks(
+    public ResponseEntity<Page<TaskOutputDto>> getAllTasks(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(taskService.getAllTasks(pageable));
+        return ResponseEntity.ok(taskServiceImpl.getAllTasks(pageable));
     }
 
     @PostMapping
@@ -49,10 +50,10 @@ public class TaskController {
     )
     @ApiResponse(responseCode = "201", description = "Задача успешно создана.")
     @ApiResponse(responseCode = "403", description = "Доступ запрещен. Требуется роль ADMIN.")
-    public ResponseEntity<TaskDto> createTask(
-            @RequestBody TaskDto taskDto) {
+    public ResponseEntity<TaskOutputDto> createTask(
+            @RequestBody TaskInputDto taskInputDto) {
         User currentUser = getCurrentUser();
-        return ResponseEntity.status(HttpStatus.CREATED).body(taskService.createTask(taskDto, currentUser));
+        return ResponseEntity.status(HttpStatus.CREATED).body(taskServiceImpl.createTask(taskInputDto, currentUser));
     }
 
     @PutMapping("/{taskId}")
@@ -63,11 +64,11 @@ public class TaskController {
     @ApiResponse(responseCode = "200", description = "Задача успешно обновлена.")
     @ApiResponse(responseCode = "403", description = "Доступ запрещен. Только создатель может редактировать задачу.")
     @ApiResponse(responseCode = "404", description = "Задача не найдена.")
-    public ResponseEntity<TaskDto> updateTask(
+    public ResponseEntity<TaskOutputDto> updateTask(
             @PathVariable Long taskId,
-            @RequestBody TaskDto taskDto) {
+            @RequestBody TaskInputDto taskInputDto) {
         User currentUser = getCurrentUser();
-        return ResponseEntity.ok(taskService.updateTask(taskId, taskDto, currentUser));
+        return ResponseEntity.ok(taskServiceImpl.updateTask(taskId, taskInputDto, currentUser));
     }
 
     @DeleteMapping("/{taskId}")
@@ -82,7 +83,7 @@ public class TaskController {
     public ResponseEntity<Void> deleteTask(
             @PathVariable Long taskId) {
         User currentUser = getCurrentUser();
-        taskService.deleteTask(taskId, currentUser);
+        taskServiceImpl.deleteTask(taskId, currentUser);
         return ResponseEntity.noContent().build();
     }
 
@@ -93,11 +94,11 @@ public class TaskController {
     )
     @ApiResponse(responseCode = "201", description = "Комментарий успешно создан.")
     @ApiResponse(responseCode = "404", description = "Задача не найдена.")
-    public ResponseEntity<CommentDto> addComment(
+    public ResponseEntity<CommentOutputDto> addComment(
             @PathVariable Long taskId,
-            @RequestBody CommentDto commentDto) {
+            @RequestBody CommentInputDto commentInputDto) {
         User currentUser = getCurrentUser();
-        return ResponseEntity.status(HttpStatus.CREATED).body(commentService.createComment(taskId, commentDto, currentUser));
+        return ResponseEntity.status(HttpStatus.CREATED).body(commentServiceImpl.createComment(taskId, commentInputDto, currentUser));
     }
 
     @PutMapping("/{taskId}/comments/{commentId}")
@@ -108,12 +109,12 @@ public class TaskController {
     @ApiResponse(responseCode = "200", description = "Комментарий успешно обновлен.")
     @ApiResponse(responseCode = "403", description = "Доступ запрещен. Только создатель может редактировать комментарий.")
     @ApiResponse(responseCode = "404", description = "Комментарий не найден.")
-    public ResponseEntity<CommentDto> updateComment(
+    public ResponseEntity<CommentOutputDto> updateComment(
             @PathVariable Long taskId,
             @PathVariable Long commentId,
-            @RequestBody CommentDto commentDto) {
+            @RequestBody CommentInputDto commentInputDto) {
         User currentUser = getCurrentUser();
-        return ResponseEntity.ok(commentService.updateComment(taskId, commentId, commentDto, currentUser));
+        return ResponseEntity.ok(commentServiceImpl.updateComment(taskId, commentId, commentInputDto, currentUser));
     }
 
     @DeleteMapping("/{taskId}/comments/{commentId}")
@@ -128,7 +129,7 @@ public class TaskController {
             @PathVariable Long taskId,
             @PathVariable Long commentId) {
         User currentUser = getCurrentUser();
-        commentService.deleteComment(taskId, commentId, currentUser);
+        commentServiceImpl.deleteComment(taskId, commentId, currentUser);
         return ResponseEntity.noContent().build();
     }
 

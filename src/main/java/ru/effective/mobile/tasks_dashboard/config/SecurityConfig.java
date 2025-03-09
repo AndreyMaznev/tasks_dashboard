@@ -38,9 +38,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Отключение CSRF
                 .cors(cors -> cors.disable()) // Отключение CORS
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/login").permitAll()
-                        .requestMatchers("/api/v1/auth/register").permitAll()
-                        .requestMatchers("/swagger-ui.html").permitAll() //todo позже настроить профили dev, prod.
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register").permitAll()
+                        .requestMatchers("/api/v1/auth/refresh-token").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(httpBasic -> httpBasic.disable())
@@ -60,6 +60,8 @@ public class SecurityConfig {
 
 
 }
+
+//todo позже настроить профили dev, prod. для эндпоинтов swagger/openapi
 
 //todo cors
 //    http.cors(cors -> cors.configurationSource(request -> {

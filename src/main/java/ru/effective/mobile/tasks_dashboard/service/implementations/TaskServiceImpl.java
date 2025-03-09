@@ -1,4 +1,4 @@
-package ru.effective.mobile.tasks_dashboard.service;
+package ru.effective.mobile.tasks_dashboard.service.implementations;
 
 
 
@@ -8,64 +8,75 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.effective.mobile.tasks_dashboard.dto.TaskDto;
+import ru.effective.mobile.tasks_dashboard.dto.TaskInputDto;
+import ru.effective.mobile.tasks_dashboard.dto.TaskOutputDto;
 import ru.effective.mobile.tasks_dashboard.exception.TaskNotFoundException;
-import ru.effective.mobile.tasks_dashboard.model.Role;
-import ru.effective.mobile.tasks_dashboard.model.Task;
-import ru.effective.mobile.tasks_dashboard.model.User;
+import ru.effective.mobile.tasks_dashboard.model.*;
 import ru.effective.mobile.tasks_dashboard.repository.TaskRepository;
+import ru.effective.mobile.tasks_dashboard.service.interfaces.TaskService;
 import ru.effective.mobile.tasks_dashboard.util.TaskMapper;
 
 
 @Service
-public class TaskService {
-    private final UserService userService;
+public class TaskServiceImpl implements TaskService {
+    private final UserServiceImpl userServiceImpl;
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
 
     @Autowired
-    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper, UserService userService) {
+    public TaskServiceImpl(TaskRepository taskRepository, TaskMapper taskMapper, UserServiceImpl userServiceImpl) {
         this.taskRepository = taskRepository;
         this.taskMapper = taskMapper;
-        this.userService = userService;
+        this.userServiceImpl = userServiceImpl;
     }
 
-    public Page<TaskDto> getAllTasks(Pageable pageable) {
-        return taskRepository.findAll(pageable).map(taskMapper::taskToTaskDto);
+    public Page<TaskOutputDto> getAllTasks(Pageable pageable) {
+        return taskRepository.findAll(pageable).map(taskMapper::taskToTaskOutputDto);
     }
 
     public Task getTaskById(long taskId) {
         return taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException("Задача с ID " + taskId + " не найдена"));
     }
 
-    public TaskDto getTaskDtoById(long taskId) {
+    public TaskOutputDto getTaskOutputDtoById(long taskId) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException("Задача с ID " + taskId + " не найдена"));
-        return taskMapper.taskToTaskDto(task);
+        return taskMapper.taskToTaskOutputDto(task);
     }
 
-    public TaskDto createTask(TaskDto taskDto, User currentUser) {
+    public TaskOutputDto createTask(TaskInputDto taskInputDto, User currentUser) {
         boolean isAdmin = currentUser.getRoles().stream()
                 .anyMatch(role -> role == Role.ROLE_ADMIN);
         if (!isAdmin) {
             throw new AccessDeniedException("Создавать задачи могут только администраторы.");
         }
-        Task task = taskMapper.taskDtoToTask(taskDto);
+        Task task = taskMapper.taskInputDtoToTask(taskInputDto);
         task.setAuthor(currentUser);
-        return taskMapper.taskToTaskDto(taskRepository.save(task));
+
+        if (taskInputDto.getExecutor() != null) {
+            task.setExecutor(userServiceImpl.getUserById(taskInputDto.getExecutor()));
+        }
+        return taskMapper.taskToTaskOutputDto(taskRepository.save(task));
     }
 
-    public TaskDto updateTask(Long taskId, TaskDto taskDto, User currentUser) {
+    public TaskOutputDto updateTask(Long taskId, TaskInputDto taskInputDto, User currentUser) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException("Задача с ID " + taskId + " не найдена"));
         if (!task.getAuthor().equals(currentUser)) {
             throw new AccessDeniedException("Редактировать задачу может только автор.");
         }
-        task.setTitle(taskDto.getTitle());
-        task.setDescription(taskDto.getDescription());
-        User executor = userService.getUserByEmail(taskDto.getExecutor().getEmail());
-        task.setExecutor(executor);
-        return taskMapper.taskToTaskDto(taskRepository.save(task));
+
+        task.setTitle(taskInputDto.getTitle());
+        task.setDescription(taskInputDto.getDescription());
+        task.setDueDate(taskInputDto.getDueDate());
+        task.setStatus(Status.fromString(taskInputDto.getStatus()));
+        task.setPriority(Priority.fromString(taskInputDto.getPriority()));
+
+        if (taskInputDto.getExecutor() != null) {
+            task.setExecutor(userServiceImpl.getUserById(taskInputDto.getExecutor()));
+        }
+
+        return taskMapper.taskToTaskOutputDto(taskRepository.save(task));
     }
 
     public void deleteTask(Long taskId, User currentUser) {
