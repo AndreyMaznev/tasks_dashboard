@@ -1,40 +1,48 @@
-package ru.effective.mobile.tasks_dashboard.service;
+package ru.effective.mobile.tasks_dashboard.service.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import ru.effective.mobile.tasks_dashboard.dto.CommentDto;
+import ru.effective.mobile.tasks_dashboard.dto.CommentInputDto;
+import ru.effective.mobile.tasks_dashboard.dto.CommentOutputDto;
 import ru.effective.mobile.tasks_dashboard.exception.CommentNotFoundException;
 import ru.effective.mobile.tasks_dashboard.exception.CommentUpdateException;
 import ru.effective.mobile.tasks_dashboard.model.Comment;
 import ru.effective.mobile.tasks_dashboard.model.Role;
 import ru.effective.mobile.tasks_dashboard.model.User;
 import ru.effective.mobile.tasks_dashboard.repository.CommentRepository;
+import ru.effective.mobile.tasks_dashboard.service.interfaces.CommentService;
 import ru.effective.mobile.tasks_dashboard.util.CommentMapper;
 
 @Service
-public class CommentService {
+public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
-    private final TaskService taskService;
+    private final TaskServiceImpl taskServiceImpl;
 
 
     @Autowired
-    public CommentService(CommentRepository commentRepository, CommentMapper commentMapper, TaskService taskService) {
+    public CommentServiceImpl(CommentRepository commentRepository, CommentMapper commentMapper, TaskServiceImpl taskServiceImpl) {
         this.commentRepository = commentRepository;
         this.commentMapper = commentMapper;
-        this.taskService = taskService;
+        this.taskServiceImpl = taskServiceImpl;
     }
 
-    public CommentDto createComment(Long taskId, CommentDto commentDto, User currentUser) {
-        taskService.checkTaskIsExists(taskId);
-        Comment comment = commentMapper.commentDtoToComment(commentDto);
-        comment.setTask(taskService.getTaskById(taskId));
+
+    public CommentOutputDto getCommentOutputDtoById(long commentId) {
+        return commentMapper.commentToCommentOutputDto(commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException("Комментарий с ID " + commentId + " не найден")));
+    }
+
+    public CommentOutputDto createComment(Long taskId, CommentInputDto commentInputDto, User currentUser) {
+        taskServiceImpl.checkTaskIsExists(taskId);
+        Comment comment = commentMapper.commentInputDtoToComment(commentInputDto);
+        comment.setTask(taskServiceImpl.getTaskById(taskId));
         comment.setAuthor(currentUser);
-        return commentMapper.commentToCommentDto(commentRepository.save(comment));
+        return commentMapper.commentToCommentOutputDto(commentRepository.save(comment));
     }
 
-    public CommentDto updateComment(Long taskId, Long commentId, CommentDto commentDto, User currentUser) {
+    public CommentOutputDto updateComment(Long taskId, Long commentId, CommentInputDto commentInputDto, User currentUser) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException("Комментарий не найден."));
         if (!comment.getAuthor().equals(currentUser)) {
@@ -43,8 +51,8 @@ public class CommentService {
         if (comment.getTask().getId()!=taskId) {
             throw new CommentUpdateException("Ошибка при редактировании комментария (Некорректный ID).");
         }
-        comment.setText(commentDto.getText());
-        return commentMapper.commentToCommentDto(commentRepository.save(comment));
+        comment.setText(commentInputDto.getText());
+        return commentMapper.commentToCommentOutputDto(commentRepository.save(comment));
     }
 
     public void deleteComment(Long taskId, Long commentId, User currentUser) {

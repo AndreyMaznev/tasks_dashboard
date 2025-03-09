@@ -1,6 +1,5 @@
-package ru.effective.mobile.tasks_dashboard.service;
+package ru.effective.mobile.tasks_dashboard.service.implementations;
 
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,15 +11,15 @@ import ru.effective.mobile.tasks_dashboard.security.UserDetailsImpl;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
-    public UserDetailsServiceImpl(UserService userService) {
-        this.userService = userService;
+    public UserDetailsServiceImpl(UserServiceImpl userServiceImpl) {
+        this.userServiceImpl = userServiceImpl;
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userService.getUserByEmail(email);
+        User user = userServiceImpl.getUserByEmail(email);
         return new UserDetailsImpl(user);
     }
 }

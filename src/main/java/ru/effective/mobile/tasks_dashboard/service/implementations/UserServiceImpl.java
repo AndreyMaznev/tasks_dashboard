@@ -1,6 +1,5 @@
-package ru.effective.mobile.tasks_dashboard.service;
+package ru.effective.mobile.tasks_dashboard.service.implementations;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,21 +10,26 @@ import ru.effective.mobile.tasks_dashboard.exception.UserNotFoundException;
 import ru.effective.mobile.tasks_dashboard.model.Role;
 import ru.effective.mobile.tasks_dashboard.model.User;
 import ru.effective.mobile.tasks_dashboard.repository.UserRepository;
+import ru.effective.mobile.tasks_dashboard.service.interfaces.UserService;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-
-public class UserService {
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+
+    public User getUserById(long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь с id : " + userId + " не найден."));
     }
 
     public User createUser(User user) {

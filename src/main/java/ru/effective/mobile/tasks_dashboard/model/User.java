@@ -34,9 +34,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Set<Role> roles = new HashSet<>();
 
-    public User(String password, String email) {
-        this.password = password;
+    public User(String email, String password) {
         this.email = email;
+        this.password = password;
     }
 
     //Для всех новых юзеров изначально устанавливаем роль - USER вызовом этого метода
