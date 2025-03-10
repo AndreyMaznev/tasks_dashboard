@@ -1,24 +1,19 @@
 package ru.effective.mobile.tasks_dashboard.util;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
+import org.mapstruct.Mapping;
 import ru.effective.mobile.tasks_dashboard.dto.TaskInputDto;
 import ru.effective.mobile.tasks_dashboard.dto.TaskOutputDto;
 import ru.effective.mobile.tasks_dashboard.model.Task;
 
-@Mapper(uses = {UserMapper.class})
+@Mapper(componentModel = "spring", uses = {UserMapper.class})
 public interface TaskMapper {
 
-    //TaskInputDto → Task
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    Task taskInputDtoToTask(TaskInputDto dto);
+    @Mapping(source = "taskInputDto.executor", target = "executor")
+    Task taskInputDtoToTask(TaskInputDto taskInputDto);
 
-    //Task → TaskOutputDto
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "createdAt", target = "createdAt")
-    @Mapping(source = "updatedAt", target = "updatedAt")
+    @Mapping(source = "task.author", target = "author")
+    @Mapping(source = "task.executor", target = "executor")
     TaskOutputDto taskToTaskOutputDto(Task task);
 }

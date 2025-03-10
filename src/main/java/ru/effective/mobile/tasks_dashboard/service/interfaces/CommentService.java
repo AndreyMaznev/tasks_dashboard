@@ -5,7 +5,7 @@ import ru.effective.mobile.tasks_dashboard.dto.CommentOutputDto;
 import ru.effective.mobile.tasks_dashboard.model.User;
 
 public interface CommentService {
-    CommentOutputDto getCommentOutputDtoById(long id);
+    CommentOutputDto getCommentById(long id);
 
     CommentOutputDto createComment(Long taskId, CommentInputDto commentInputDto, User currentUser);
     CommentOutputDto updateComment(Long taskId, Long commentId, CommentInputDto commentInputDto, User currentUser);

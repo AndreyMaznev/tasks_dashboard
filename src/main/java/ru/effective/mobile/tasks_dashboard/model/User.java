@@ -1,6 +1,10 @@
 package ru.effective.mobile.tasks_dashboard.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.HashSet;
@@ -19,15 +23,15 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column (name = "user_id")
-    private long id;
+    private Long id;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "username")
+    @Column(name = "username", nullable = false)
     private String username;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -44,4 +48,14 @@ public class User {
         this.roles.add(Role.ROLE_USER);
     }
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", username='" + username + '\'' +
+                ", roles=" + roles +
+                '}';
+    }
 }

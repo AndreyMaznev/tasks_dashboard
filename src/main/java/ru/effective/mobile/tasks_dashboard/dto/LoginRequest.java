@@ -1,22 +1,17 @@
 package ru.effective.mobile.tasks_dashboard.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class LoginRequest {
+    @NotBlank(message = "Email является обязательным полем")
+    @Email(message = "Некорректный формат email")
     private String email;
+
+    @NotBlank(message = "Пароль является обязательным полем")
     private String password;
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

@@ -11,14 +11,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.effective.mobile.tasks_dashboard.dto.*;
 import ru.effective.mobile.tasks_dashboard.dto.TaskInputDto;
 import ru.effective.mobile.tasks_dashboard.dto.TaskOutputDto;
+import ru.effective.mobile.tasks_dashboard.model.Priority;
+import ru.effective.mobile.tasks_dashboard.model.Role;
+import ru.effective.mobile.tasks_dashboard.model.Status;
 import ru.effective.mobile.tasks_dashboard.model.User;
 import ru.effective.mobile.tasks_dashboard.service.implementations.CommentServiceImpl;
 import ru.effective.mobile.tasks_dashboard.service.implementations.TaskServiceImpl;
+import ru.effective.mobile.tasks_dashboard.service.implementations.UserServiceImpl;
+
+import java.util.Set;
 
 
 @RestController
@@ -28,6 +35,7 @@ public class TaskController {
 
     private final TaskServiceImpl taskServiceImpl;
     private final CommentServiceImpl commentServiceImpl;
+    private final UserServiceImpl userServiceImpl;
 
     @GetMapping
     @Operation(
@@ -37,13 +45,17 @@ public class TaskController {
     @ApiResponse(responseCode = "200", description = "Успешно получены задачи.")
     public ResponseEntity<Page<TaskOutputDto>> getAllTasks(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Status status,
+            @RequestParam(required = false) Priority priority,
+            @RequestParam(required = false) String authorName,
+            @RequestParam(required = false) String executorName) {
         Pageable pageable = PageRequest.of(page, size);
-        return ResponseEntity.ok(taskServiceImpl.getAllTasks(pageable));
+        return ResponseEntity.ok(taskServiceImpl.getAllTasksWithFilters(status, priority, authorName, executorName, pageable));
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Создание новой задачи, только для ADMIN.",
             description = "Создает новую задачу. Доступно только пользователям с ролью ADMIN."
@@ -72,7 +84,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/{taskId}")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Удаление задачи, только для ADMIN.",
             description = "Удаляет задачу по её ID. Доступно только пользователям с ролью ADMIN."
@@ -81,9 +93,8 @@ public class TaskController {
     @ApiResponse(responseCode = "403", description = "Доступ запрещен. Требуется роль ADMIN.")
     @ApiResponse(responseCode = "404", description = "Задача не найдена.")
     public ResponseEntity<Void> deleteTask(
-            @PathVariable Long taskId) {
-        User currentUser = getCurrentUser();
-        taskServiceImpl.deleteTask(taskId, currentUser);
+            @PathVariable long taskId) {
+        taskServiceImpl.deleteTask(taskId);
         return ResponseEntity.noContent().build();
     }
 
@@ -134,6 +145,7 @@ public class TaskController {
     }
 
     private User getCurrentUser() {
-        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String userEmail = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return userServiceImpl.getUserByEmail(userEmail);
     }
 }

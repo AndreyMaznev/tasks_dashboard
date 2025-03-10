@@ -29,6 +29,7 @@ public class UserDetailsImpl implements UserDetails {
                 .collect(Collectors.toSet());
     }
 
+
     public User getUser() {
         return user;
     }

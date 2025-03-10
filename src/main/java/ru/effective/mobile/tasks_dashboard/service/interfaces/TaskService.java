@@ -13,6 +13,6 @@ public interface TaskService {
     TaskOutputDto getTaskOutputDtoById(long taskId);
     TaskOutputDto createTask(TaskInputDto taskInputDto, User currentUser);
     TaskOutputDto updateTask(Long taskId, TaskInputDto taskInputDto, User currentUser);
-    void deleteTask(Long taskId, User currentUser);
+    void deleteTask(Long taskId);
     void checkTaskIsExists(Long taskId);
 }
