@@ -1,19 +1,25 @@
 package ru.effective.mobile.tasks_dashboard.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.effective.mobile.tasks_dashboard.exception.util.ApplicationError;
+import ru.effective.mobile.tasks_dashboard.exception.util.ValidationError;
+import ru.effective.mobile.tasks_dashboard.exception.util.ValidationErrorResponse;
 
 import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -43,25 +49,25 @@ public class GlobalExceptionHandler {
     public ResponseEntity <ApplicationError> handleUserAlreadyHaveAssignedRoleException (UserAlreadyHaveAssignedRoleException e) {
         logger.error (e.getMessage(), e);
         return new ResponseEntity <> (
-                new ApplicationError(HttpStatus.NOT_FOUND.value(),
+                new ApplicationError(HttpStatus.CONFLICT.value(),
                         e.getMessage()),
-                HttpStatus.NOT_MODIFIED);
+                HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(EmailAlreadyInUseException.class)
     public ResponseEntity <ApplicationError> handleEmailAlreadyInUseException (EmailAlreadyInUseException e) {
         logger.error (e.getMessage(), e);
         return new ResponseEntity <> (
-                new ApplicationError(HttpStatus.NOT_FOUND.value(),
+                new ApplicationError(HttpStatus.CONFLICT.value(),
                         e.getMessage()),
-                HttpStatus.NOT_ACCEPTABLE);
+                HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(IllegalCredentialsException.class)
     public ResponseEntity <ApplicationError> handleIllegalCredentialsException (IllegalCredentialsException e) {
         logger.error (e.getMessage(), e);
         return new ResponseEntity <> (
-                new ApplicationError(HttpStatus.NOT_FOUND.value(),
+                new ApplicationError(HttpStatus.BAD_REQUEST.value(),
                         e.getMessage()),
                 HttpStatus.BAD_REQUEST);
     }
@@ -70,18 +76,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity <ApplicationError> handleIllegalJwtTokenException (IllegalJwtTokenException e) {
         logger.error (e.getMessage(), e);
         return new ResponseEntity <> (
-                new ApplicationError(HttpStatus.NOT_FOUND.value(),
+                new ApplicationError(HttpStatus.BAD_REQUEST.value(),
                         e.getMessage()),
                 HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity <ApplicationError> handleIAccessDeniedException (AccessDeniedException e) {
+    @ExceptionHandler(AccessRefusedException.class)
+    public ResponseEntity <ApplicationError> handleAccessRefusedException (AccessRefusedException e) {
         logger.error (e.getMessage(), e);
         return new ResponseEntity <> (
-                new ApplicationError(HttpStatus.NOT_FOUND.value(),
+                new ApplicationError(HttpStatus.FORBIDDEN.value(),
                         e.getMessage()),
-                HttpStatus.BAD_REQUEST);
+                HttpStatus.FORBIDDEN);
     }
 
 
@@ -89,10 +95,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity <ApplicationError> handleTaskUpdateException (TaskUpdateException e) {
         logger.error (e.getMessage(), e);
         return new ResponseEntity <> (
-                new ApplicationError(HttpStatus.NOT_FOUND.value(),
+                new ApplicationError(HttpStatus.BAD_REQUEST.value(),
                         e.getMessage()),
                 HttpStatus.BAD_REQUEST);
-        //todo проверить код возврата
     }
 
     @ExceptionHandler(TaskNotFoundException.class)
@@ -102,6 +107,24 @@ public class GlobalExceptionHandler {
                 new ApplicationError(HttpStatus.NOT_FOUND.value(),
                         e.getMessage()),
                 HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(IllegalTaskStatusException.class)
+    public ResponseEntity <ApplicationError> handleIllegalTaskStatusException (IllegalTaskStatusException e) {
+        logger.error (e.getMessage(), e);
+        return new ResponseEntity <> (
+                new ApplicationError(HttpStatus.BAD_REQUEST.value(),
+                        e.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalTaskPriorityException.class)
+    public ResponseEntity <ApplicationError> handleIllegalTaskPriorityException (IllegalTaskPriorityException e) {
+        logger.error (e.getMessage(), e);
+        return new ResponseEntity <> (
+                new ApplicationError(HttpStatus.BAD_REQUEST.value(),
+                        e.getMessage()),
+                HttpStatus.BAD_REQUEST);
     }
 
 
@@ -118,24 +141,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity <ApplicationError> handleCommentNotFoundException (CommentUpdateException e) {
         logger.error (e.getMessage(), e);
         return new ResponseEntity <> (
-                new ApplicationError(HttpStatus.NOT_FOUND.value(),
+                new ApplicationError(HttpStatus.BAD_REQUEST.value(),
                         e.getMessage()),
                 HttpStatus.BAD_REQUEST);
-        //todo проверить код возврата
     }
 
-
-    //todo читаемо норм?
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity <ApplicationError> catchGeneralException(Exception e) {
@@ -145,4 +155,42 @@ public class GlobalExceptionHandler {
                         e.getMessage()),
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity <ApplicationError> catchHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        logger.error (e.getMessage(), e);
+        return new ResponseEntity <> (
+                new ApplicationError(HttpStatus.BAD_REQUEST.value(),
+                        "Некорректный JSON!"),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        List<ValidationError> errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> new ValidationError(
+                        error.getField(),
+                        error.getDefaultMessage()
+                ))
+                .collect(Collectors.toList());
+
+        ValidationErrorResponse response = new ValidationErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Ошибка валидации",
+                errors
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    //    //todo читаемо норм?
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+//        Map<String, String> errors = new HashMap<>();
+//        ex.getBindingResult().getAllErrors().forEach(error -> {
+//            String fieldName = ((FieldError) error).getField();
+//            String errorMessage = error.getDefaultMessage();
+//            errors.put(fieldName, errorMessage);
+//        });
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+//    }
 }

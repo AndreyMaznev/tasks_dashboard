@@ -1,11 +1,11 @@
-package ru.effective.mobile.tasks_dashboard.service.implementations;
+package ru.effective.mobile.tasks_dashboard.security;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.effective.mobile.tasks_dashboard.model.User;
-import ru.effective.mobile.tasks_dashboard.security.UserDetailsImpl;
+import ru.effective.mobile.tasks_dashboard.service.implementations.UserServiceImpl;
 
 //For Spring Security
 @Service

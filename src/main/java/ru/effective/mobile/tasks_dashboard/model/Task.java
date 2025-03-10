@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-@Entity
-@Table(name = "tasks")
 @Getter
 @Setter
+@Entity
+@Table(name = "tasks")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,7 +21,7 @@ public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column (name = "task_id")
-    private long id;
+    private Long id;
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -52,9 +52,14 @@ public class Task {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "due_date")
     private LocalDateTime dueDate;
+
 }
 
 

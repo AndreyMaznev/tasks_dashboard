@@ -26,12 +26,10 @@ public class Comment {
     @JoinColumn(name = "author_id")
     private User author;
 
-    //todo JSON props ?
     @ManyToOne (fetch = FetchType.EAGER)
     @JoinColumn(name = "task_id")
     private Task task;
 
-    //todo JSON props ?
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private LocalDateTime createdAt;
