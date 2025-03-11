@@ -38,7 +38,7 @@ class TokenServiceImplTest {
     @InjectMocks
     private TokenServiceImpl tokenService;
 
-    private static final String EMAIL = "test@example.com";
+    private static final String EMAIL = "andrey@ya.ru";
     private static final String ACCESS_TOKEN = "accessToken";
     private static final String REFRESH_TOKEN = "refreshToken";
     private static final Set<String> ROLES = Collections.singleton("ROLE_USER");
