@@ -1,20 +1,14 @@
 package ru.effective.mobile.tasks_dashboard.security;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.effective.mobile.tasks_dashboard.model.User;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 
-//For Spring Security
 public class UserDetailsImpl implements UserDetails {
     private final User user;
 

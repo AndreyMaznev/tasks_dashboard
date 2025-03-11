@@ -14,6 +14,7 @@ public interface TaskMapper {
     Task taskInputDtoToTask(TaskInputDto taskInputDto);
 
 
+    @Mapping(source = "task.id", target = "id")
     @Mapping(source = "task.author", target = "author")
     @Mapping(source = "task.executor", target = "executor")
     @Mapping(source = "task.comments", target = "comments")

@@ -2,6 +2,7 @@ package ru.effective.mobile.tasks_dashboard.model;
 
 import ru.effective.mobile.tasks_dashboard.exception.IllegalTaskPriorityException;
 
+
 public enum Priority {
     HIGH, MEDIUM, LOW;
 

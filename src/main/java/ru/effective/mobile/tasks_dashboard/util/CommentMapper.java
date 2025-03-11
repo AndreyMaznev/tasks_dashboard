@@ -12,6 +12,7 @@ public interface CommentMapper {
 
     Comment commentInputDtoToComment(CommentInputDto dto);
 
+    @Mapping(source = "comment.id", target = "id")
     @Mapping(source = "comment.text", target = "text")
     @Mapping(source = "comment.author", target = "author")
     @Mapping(source = "comment.createdAt", target = "createdAt")

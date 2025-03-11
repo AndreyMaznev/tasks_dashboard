@@ -4,11 +4,11 @@ package ru.effective.mobile.tasks_dashboard.service.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +23,6 @@ import ru.effective.mobile.tasks_dashboard.repository.TaskRepository;
 import ru.effective.mobile.tasks_dashboard.service.interfaces.TaskService;
 import ru.effective.mobile.tasks_dashboard.specifications.TaskSpecifications;
 import ru.effective.mobile.tasks_dashboard.util.TaskMapper;
-import ru.effective.mobile.tasks_dashboard.util.UserMapper;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -34,20 +32,13 @@ public class TaskServiceImpl implements TaskService {
     private final UserServiceImpl userServiceImpl;
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
-    private final UserMapper userMapper;
 
 
     @Autowired
-    public TaskServiceImpl(TaskRepository taskRepository, TaskMapper taskMapper, UserServiceImpl userServiceImpl, UserMapper userMapper) {
+    public TaskServiceImpl(TaskRepository taskRepository, TaskMapper taskMapper, UserServiceImpl userServiceImpl) {
         this.taskRepository = taskRepository;
         this.taskMapper = taskMapper;
         this.userServiceImpl = userServiceImpl;
-        this.userMapper = userMapper;
-    }
-
-    @Transactional(readOnly = true)
-    public Page<TaskOutputDto> getAllTasks(Pageable pageable) {
-        return taskRepository.findAll(pageable).map(taskMapper::taskToTaskOutputDto);
     }
 
     @Transactional(readOnly = true)
@@ -79,17 +70,13 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(readOnly = true)
     @Cacheable(value = "tasks", key = "#taskId")
     public Task getTaskById(long taskId) {
-        return taskRepository.findById(taskId).orElseThrow(() -> new TaskNotFoundException("Задача с ID " + taskId + " не найдена"));
-    }
-
-    public TaskOutputDto getTaskOutputDtoById(long taskId) {
-        Task task = taskRepository.findById(taskId)
+        return taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException("Задача с ID " + taskId + " не найдена"));
-        return taskMapper.taskToTaskOutputDto(task);
     }
 
     @Transactional
-    @CacheEvict(value = "tasks", allEntries = true)
+    @CachePut(value = "tasks", key = "#result.id")
+//    @CacheEvict(value = "tasks", allEntries = true)
     public TaskOutputDto createTask(TaskInputDto taskInputDto, User currentUser) {
         if (!isCurrentUserAdmin()) {
             throw new AccessRefusedException("Создавать задачи могут только администраторы.");
@@ -103,11 +90,11 @@ public class TaskServiceImpl implements TaskService {
         } else {
             task.setExecutor(null);
         }
-
-        return taskMapper.taskToTaskOutputDto(taskRepository.save(task));
+        Task savedTask = taskRepository.save(task);
+        return taskMapper.taskToTaskOutputDto(savedTask);
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = TaskUpdateException.class)
     @CacheEvict(value = "tasks", key = "#taskId")
     public TaskOutputDto updateTask(Long taskId, TaskInputDto taskInputDto, User currentUser) {
         Task task = taskRepository.findById(taskId)
@@ -132,9 +119,8 @@ public class TaskServiceImpl implements TaskService {
             task.setUpdatedAt(LocalDateTime.now());
             task.setDueDate(taskInputDto.getDueDate());
             if (taskInputDto.getExecutor() != null) {
+                //Если будет exception, без try вся транзакция удалится
                 try {
-
-                    // Пытаемся найти пользователя по email
                     User executor = userServiceImpl.getUserByEmail(taskInputDto.getExecutor().getEmail());
                     task.setExecutor(executor);
                 } catch (UserNotFoundException e) {
@@ -155,13 +141,6 @@ public class TaskServiceImpl implements TaskService {
             throw new AccessRefusedException("Удалять задачи могут только администраторы.");
         }
         taskRepository.delete(task);
-    }
-
-    @Transactional(readOnly = true)
-    public void checkTaskIsExists(Long taskId) {
-        if (!taskRepository.existsById(taskId)) {
-            throw new TaskNotFoundException("Задача с ID " + taskId + " не найдена");
-        }
     }
 
     public boolean isCurrentUserAdmin() {

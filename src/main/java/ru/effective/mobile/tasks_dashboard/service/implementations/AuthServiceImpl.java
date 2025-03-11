@@ -27,7 +27,6 @@ public class AuthServiceImpl implements AuthService {
         this.authenticationManager = authenticationManager;
     }
 
-
     public RegisterResponse registerWithTokens(RegisterRequest request) {
         User user = userServiceImpl.createUser(new User(request.getEmail(), request.getPassword()));
         Map <String, String > tokenPair = tokenServiceImpl.generateTokenPair(user.getEmail(), user.getRoles());
@@ -56,8 +55,6 @@ public class AuthServiceImpl implements AuthService {
                 .refreshToken(tokenPair.get("refresh_token"))
                 .build();
     }
-
-    //todo убрать дублирование кода для DTOшек
 
     public User authenticate(String email, String password) {
         Authentication authentication = authenticationManager.authenticate(

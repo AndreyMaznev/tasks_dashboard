@@ -3,6 +3,7 @@ package ru.effective.mobile.tasks_dashboard.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import ru.effective.mobile.tasks_dashboard.exception.IllegalTaskStatusException;
 
+
 public enum Status {
     WAITING, IN_PROGRESS, COMPLETED;
 
