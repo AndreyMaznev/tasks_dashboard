@@ -55,7 +55,6 @@ public class TaskController {
     }
 
     @PostMapping
-//    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Создание новой задачи, только для ADMIN.",
             description = "Создает новую задачу. Доступно только пользователям с ролью ADMIN."
@@ -64,8 +63,7 @@ public class TaskController {
     @ApiResponse(responseCode = "403", description = "Доступ запрещен. Требуется роль ADMIN.")
     public ResponseEntity<TaskOutputDto> createTask(
             @RequestBody TaskInputDto taskInputDto) {
-        User currentUser = getCurrentUser();
-        return ResponseEntity.status(HttpStatus.CREATED).body(taskServiceImpl.createTask(taskInputDto, currentUser));
+        return ResponseEntity.status(HttpStatus.CREATED).body(taskServiceImpl.createTask(taskInputDto, getCurrentUser()));
     }
 
     @PutMapping("/{taskId}")
@@ -79,12 +77,10 @@ public class TaskController {
     public ResponseEntity<TaskOutputDto> updateTask(
             @PathVariable Long taskId,
             @RequestBody TaskInputDto taskInputDto) {
-        User currentUser = getCurrentUser();
-        return ResponseEntity.ok(taskServiceImpl.updateTask(taskId, taskInputDto, currentUser));
+        return ResponseEntity.ok(taskServiceImpl.updateTask(taskId, taskInputDto, getCurrentUser()));
     }
 
     @DeleteMapping("/{taskId}")
-//    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Удаление задачи, только для ADMIN.",
             description = "Удаляет задачу по её ID. Доступно только пользователям с ролью ADMIN."
@@ -108,14 +104,13 @@ public class TaskController {
     public ResponseEntity<CommentOutputDto> addComment(
             @PathVariable Long taskId,
             @RequestBody CommentInputDto commentInputDto) {
-        User currentUser = getCurrentUser();
-        return ResponseEntity.status(HttpStatus.CREATED).body(commentServiceImpl.createComment(taskId, commentInputDto, currentUser));
+        return ResponseEntity.status(HttpStatus.CREATED).body(commentServiceImpl.createComment(taskId, commentInputDto, getCurrentUser()));
     }
 
-    @PutMapping("/{taskId}/comments/{commentId}")
+    @PutMapping("/{taskId}/comrrrments/{commentId}")
     @Operation(
-            summary = "Редактирование комментария, только для создателя.",
-            description = "Обновляет текст комментария. Доступно только создателю комментария."
+            summary = "Редактирование комментария, только для администратора.",
+            description = "Обновляет текст комментария. Доступно только администратору."
     )
     @ApiResponse(responseCode = "200", description = "Комментарий успешно обновлен.")
     @ApiResponse(responseCode = "403", description = "Доступ запрещен. Только создатель может редактировать комментарий.")
@@ -124,23 +119,22 @@ public class TaskController {
             @PathVariable Long taskId,
             @PathVariable Long commentId,
             @RequestBody CommentInputDto commentInputDto) {
-        User currentUser = getCurrentUser();
-        return ResponseEntity.ok(commentServiceImpl.updateComment(taskId, commentId, commentInputDto, currentUser));
+        return ResponseEntity.ok(commentServiceImpl.updateComment(taskId, commentId, commentInputDto, getCurrentUser()));
     }
 
     @DeleteMapping("/{taskId}/comments/{commentId}")
     @Operation(
-            summary = "Удаление комментария, только для создателя.",
-            description = "Удаляет комментарий по его ID. Доступно только создателю комментария."
+            summary = "Удаление комментария, только для администраторов.",
+            description = "Удаляет комментарий по его ID. Доступно только администратору."
     )
+
     @ApiResponse(responseCode = "204", description = "Комментарий успешно удален.")
     @ApiResponse(responseCode = "403", description = "Доступ запрещен. Только создатель может удалить комментарий.")
     @ApiResponse(responseCode = "404", description = "Комментарий не найден.")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long taskId,
             @PathVariable Long commentId) {
-        User currentUser = getCurrentUser();
-        commentServiceImpl.deleteComment(taskId, commentId, currentUser);
+        commentServiceImpl.deleteComment(taskId, commentId, getCurrentUser());
         return ResponseEntity.noContent().build();
     }
 

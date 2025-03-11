@@ -1,6 +1,6 @@
 package ru.effective.mobile.tasks_dashboard.service.interfaces;
 
-import ru.effective.mobile.tasks_dashboard.dto.*;
+import ru.effective.mobile.tasks_dashboard.dto.auth.*;
 import ru.effective.mobile.tasks_dashboard.model.User;
 
 public interface AuthService {

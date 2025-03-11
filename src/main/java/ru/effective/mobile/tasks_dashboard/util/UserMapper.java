@@ -16,6 +16,7 @@ public interface UserMapper {
      User userInputDtoToUser(UserInputDto userInputDto);
 
      @Mapping(source = "user.email", target = "email")
+     @Mapping(source = "user.roles", target = "roles")
      UserOutputDto userToUserOutputDto(User user);
 
 }

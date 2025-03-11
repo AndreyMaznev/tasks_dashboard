@@ -1,8 +1,12 @@
 package ru.effective.mobile.tasks_dashboard.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
+import ru.effective.mobile.tasks_dashboard.model.Comment;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,6 +34,7 @@ public class TaskOutputDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
 
+    private List<CommentOutputDto> comments;
     private UserOutputDto author;
     private UserOutputDto executor;
 }

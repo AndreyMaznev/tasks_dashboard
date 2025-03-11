@@ -11,12 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommentInputDto {
-//
-//    private Long authorId;
 
     @NotBlank(message = "Текст комментария является обязательным полем")
     private String text;
-
-//    @NotNull(message = "ID задачи является обязательным полем")
-//    private Long taskId;
 }

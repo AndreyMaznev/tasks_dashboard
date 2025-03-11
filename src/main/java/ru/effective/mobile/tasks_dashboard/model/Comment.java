@@ -1,5 +1,6 @@
 package ru.effective.mobile.tasks_dashboard.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,15 +23,28 @@ public class Comment {
     @Column(name = "text", nullable = false)
     private String text;
 
+
     @ManyToOne (fetch = FetchType.EAGER)
     @JoinColumn(name = "author_id")
     private User author;
 
-    @ManyToOne (fetch = FetchType.EAGER)
+    @JsonBackReference
+    @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")
     private Task task;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Override
+    public String toString() {
+        return "Comment{" +
+                "id=" + id +
+                ", text='" + text + '\'' +
+                ", author=" + author +
+                ", task=" + task +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

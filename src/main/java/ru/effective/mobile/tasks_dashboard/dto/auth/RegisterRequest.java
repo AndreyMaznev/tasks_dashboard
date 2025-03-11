@@ -1,11 +1,9 @@
-package ru.effective.mobile.tasks_dashboard.dto;
+package ru.effective.mobile.tasks_dashboard.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-
-import java.util.Set;
 
 @Data
 public class RegisterRequest {

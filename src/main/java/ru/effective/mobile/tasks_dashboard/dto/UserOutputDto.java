@@ -20,5 +20,5 @@ public class UserOutputDto{
 
     private String username;
 
-//    private Set<String> roles;
+    private Set<String> roles;
 }

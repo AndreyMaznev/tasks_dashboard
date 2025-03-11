@@ -16,6 +16,8 @@ import ru.effective.mobile.tasks_dashboard.dto.TaskInputDto;
 import ru.effective.mobile.tasks_dashboard.dto.TaskOutputDto;
 import ru.effective.mobile.tasks_dashboard.exception.AccessRefusedException;
 import ru.effective.mobile.tasks_dashboard.exception.TaskNotFoundException;
+import ru.effective.mobile.tasks_dashboard.exception.TaskUpdateException;
+import ru.effective.mobile.tasks_dashboard.exception.UserNotFoundException;
 import ru.effective.mobile.tasks_dashboard.model.*;
 import ru.effective.mobile.tasks_dashboard.repository.TaskRepository;
 import ru.effective.mobile.tasks_dashboard.service.interfaces.TaskService;
@@ -24,6 +26,7 @@ import ru.effective.mobile.tasks_dashboard.util.TaskMapper;
 import ru.effective.mobile.tasks_dashboard.util.UserMapper;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 
 @Service
@@ -69,8 +72,8 @@ public class TaskServiceImpl implements TaskService {
         if (executorName != null && !executorName.isEmpty()) {
             spec = spec.and(TaskSpecifications.hasExecutorName(executorName));
         }
-
-        return taskRepository.findAll(spec, pageable).map(taskMapper::taskToTaskOutputDto);
+        return taskRepository.findAll(spec, pageable)
+                .map(taskMapper::taskToTaskOutputDto);
     }
 
     @Transactional(readOnly = true)
@@ -107,24 +110,37 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     @CacheEvict(value = "tasks", key = "#taskId")
     public TaskOutputDto updateTask(Long taskId, TaskInputDto taskInputDto, User currentUser) {
-
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new TaskNotFoundException("Задача с ID " + taskId + " не найдена"));
+
         boolean isAdmin = isCurrentUserAdmin();
-        if (!task.getExecutor().equals(currentUser) && !isAdmin) {
+        if (!isAdmin && task.getExecutor() == null) {
+            throw new AccessRefusedException("Редактировать задачу может только исполнитель или администратор");
+        }
+        if (!isAdmin && !task.getExecutor().equals(currentUser)) {
             throw new AccessRefusedException("Редактировать задачу может только исполнитель или администратор");
         }
 
-        if (task.getExecutor().equals(currentUser) || !isCurrentUserAdmin()) {
+        if (Objects.equals(task.getExecutor(), currentUser)) {
             task.setStatus(Status.fromString(taskInputDto.getStatus()));
-        } else if (isCurrentUserAdmin()) {
+        }
+        if (isCurrentUserAdmin()) {
+            task.setStatus(Status.fromString(taskInputDto.getStatus()));
             task.setTitle(taskInputDto.getTitle());
             task.setDescription(taskInputDto.getDescription());
             task.setPriority(Priority.fromString(taskInputDto.getPriority()));
             task.setUpdatedAt(LocalDateTime.now());
             task.setDueDate(taskInputDto.getDueDate());
             if (taskInputDto.getExecutor() != null) {
-                task.setExecutor(userMapper.userInputDtoToUser(taskInputDto.getExecutor()));
+                try {
+
+                    // Пытаемся найти пользователя по email
+                    User executor = userServiceImpl.getUserByEmail(taskInputDto.getExecutor().getEmail());
+                    task.setExecutor(executor);
+                } catch (UserNotFoundException e) {
+                    // Если пользователь не найден, выбрасываем исключение, но не откатываем задачу
+                    throw new TaskUpdateException("Пользователь с email " + taskInputDto.getExecutor().getEmail() + " не найден");
+                }
             }
         }
         return taskMapper.taskToTaskOutputDto(taskRepository.save(task));

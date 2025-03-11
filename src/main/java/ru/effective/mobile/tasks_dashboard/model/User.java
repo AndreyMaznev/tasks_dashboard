@@ -43,11 +43,6 @@ public class User {
         this.password = password;
     }
 
-    //Для всех новых юзеров изначально устанавливаем роль - USER вызовом этого метода
-    public void setDefaultRole (){
-        this.roles.add(Role.ROLE_USER);
-    }
-
     @Override
     public String toString() {
         return "User{" +

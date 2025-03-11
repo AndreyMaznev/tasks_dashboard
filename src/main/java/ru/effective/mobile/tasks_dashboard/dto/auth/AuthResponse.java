@@ -1,4 +1,4 @@
-package ru.effective.mobile.tasks_dashboard.dto;
+package ru.effective.mobile.tasks_dashboard.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RefreshResponse {
+public class AuthResponse {
     private String message;
     private String accessToken;
     private String refreshToken;

@@ -1,4 +1,4 @@
-package ru.effective.mobile.tasks_dashboard.dto;
+package ru.effective.mobile.tasks_dashboard.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

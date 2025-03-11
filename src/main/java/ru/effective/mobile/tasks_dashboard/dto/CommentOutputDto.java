@@ -1,6 +1,8 @@
 package ru.effective.mobile.tasks_dashboard.dto;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -22,5 +24,6 @@ public class CommentOutputDto {
 
     private UserOutputDto author;
 
+    @JsonIgnore
     private TaskOutputDto taskOutputDto;
 }

@@ -1,24 +1,17 @@
-package ru.effective.mobile.tasks_dashboard.exception;
+package ru.effective.mobile.tasks_dashboard.exception.util;
 
-import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.effective.mobile.tasks_dashboard.exception.util.ApplicationError;
-import ru.effective.mobile.tasks_dashboard.exception.util.ValidationError;
-import ru.effective.mobile.tasks_dashboard.exception.util.ValidationErrorResponse;
+import ru.effective.mobile.tasks_dashboard.exception.*;
 
-import java.nio.file.AccessDeniedException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice

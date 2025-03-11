@@ -2,6 +2,7 @@ package ru.effective.mobile.tasks_dashboard.model;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -45,6 +46,7 @@ public class Task {
     @JoinColumn(name = "executor_id")
     private User executor;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "task", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Comment> comments;
 
