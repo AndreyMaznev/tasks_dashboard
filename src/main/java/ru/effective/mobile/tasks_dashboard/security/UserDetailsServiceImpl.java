@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import ru.effective.mobile.tasks_dashboard.model.User;
 import ru.effective.mobile.tasks_dashboard.service.implementations.UserServiceImpl;
 
-//For Spring Security
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 

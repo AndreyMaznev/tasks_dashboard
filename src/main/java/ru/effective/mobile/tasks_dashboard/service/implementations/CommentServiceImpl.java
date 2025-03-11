@@ -2,8 +2,8 @@ package ru.effective.mobile.tasks_dashboard.service.implementations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,10 +12,7 @@ import ru.effective.mobile.tasks_dashboard.dto.CommentOutputDto;
 import ru.effective.mobile.tasks_dashboard.exception.AccessRefusedException;
 import ru.effective.mobile.tasks_dashboard.exception.CommentNotFoundException;
 import ru.effective.mobile.tasks_dashboard.exception.CommentUpdateException;
-import ru.effective.mobile.tasks_dashboard.model.Comment;
-import ru.effective.mobile.tasks_dashboard.model.Role;
-import ru.effective.mobile.tasks_dashboard.model.Task;
-import ru.effective.mobile.tasks_dashboard.model.User;
+import ru.effective.mobile.tasks_dashboard.model.*;
 import ru.effective.mobile.tasks_dashboard.repository.CommentRepository;
 import ru.effective.mobile.tasks_dashboard.service.interfaces.CommentService;
 import ru.effective.mobile.tasks_dashboard.util.CommentMapper;
@@ -45,16 +42,17 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new CommentNotFoundException("Комментарий с ID " + commentId + " не найден")));
     }
 
-    @CacheEvict(value = "comments", allEntries = true)
+    @CachePut(value = "comments", key = "#result.id")
     @Transactional
     public CommentOutputDto createComment(Long taskId, CommentInputDto commentInputDto, User currentUser) {
-        taskServiceImpl.checkTaskIsExists(taskId);
         Task task = taskServiceImpl.getTaskById(taskId);
         boolean isAdmin = isCurrentUserAdmin();
-        if (!isAdmin && !task.getExecutor().equals(currentUser) ) {
-            throw new AccessRefusedException("Создавать комментарии могут только исполнители задачи или администраторы");
+        if (!isAdmin && task.getExecutor() == null) {
+            throw new AccessRefusedException("Оставлять комментарии может только исполнитель или администратор");
         }
-
+        if (!isAdmin && !task.getExecutor().equals(currentUser)) {
+            throw new AccessRefusedException("Оставлять комментарии может только исполнитель или администратор");
+        }
         Comment comment = commentMapper.commentInputDtoToComment(commentInputDto);
         comment.setTask(task);
         comment.setAuthor(currentUser);
@@ -63,17 +61,16 @@ public class CommentServiceImpl implements CommentService {
         return commentMapper.commentToCommentOutputDto(commentRepository.save(comment));
     }
 
-    @CacheEvict(value = "comments", key = "#commentId")
+    @CachePut(value = "comments", key = "#commentId")
     @Transactional
     public CommentOutputDto updateComment(Long taskId, Long commentId, CommentInputDto commentInputDto, User currentUser) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException("Комментарий не найден"));
-        boolean isAdmin = isCurrentUserAdmin();
-        if (!comment.getAuthor().equals(currentUser) && !isAdmin) {
-            throw new AccessRefusedException("Редактировать комментарий может только автор или админ");
+        if (!isCurrentUserAdmin()) {
+            throw new AccessRefusedException("Редактировать комментарий может только админ");
         }
         if (!Objects.equals(comment.getTask().getId(), taskId)) {
-            throw new CommentUpdateException("Ошибка при редактировании комментария (Некорректный ID)");
+            throw new CommentUpdateException("Ошибка при редактировании комментария: Некорректные значения ID");
         }
         comment.setText(commentInputDto.getText());
         return commentMapper.commentToCommentOutputDto(commentRepository.save(comment));
@@ -84,14 +81,14 @@ public class CommentServiceImpl implements CommentService {
     public void deleteComment(Long taskId, Long commentId, User currentUser) {
         boolean isAdmin = isCurrentUserAdmin();
         if (!isAdmin) {
-            throw new AccessRefusedException("Удалить или редактировать комментарий может только админ или автор");
+            throw new AccessRefusedException("Удалить комментарий может только админ");
         }
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException("Комментарий не найден"));
 
-        //Разница между переданным id задачи и тем, который в БД.
+        //Если разница между переданным id задачи и тем, который в БД.
         if (!Objects.equals(comment.getTask().getId(), taskId)) {
-            throw new CommentUpdateException("Ошибка при редактировании комментария (Некорректный ID)");
+            throw new CommentUpdateException("Ошибка при редактировании комментария: Некорректные значения ID");
         }
         commentRepository.delete(comment);
     }

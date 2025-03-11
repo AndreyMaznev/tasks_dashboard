@@ -1,7 +1,7 @@
 package ru.effective.mobile.tasks_dashboard.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -11,12 +11,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CommentInputDto {
-//
-//    private Long authorId;
 
-    @NotBlank(message = "Текст комментария является обязательным полем")
+    @Schema(description = "Текст комментария", example = "Чтобы к полудню задача была готова!")
+    @NotBlank(message = "Текст комментария является обязательным полем.")
     private String text;
-
-//    @NotNull(message = "ID задачи является обязательным полем")
-//    private Long taskId;
 }

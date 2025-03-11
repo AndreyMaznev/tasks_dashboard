@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.effective.mobile.tasks_dashboard.dto.*;
+import ru.effective.mobile.tasks_dashboard.dto.auth.*;
 import ru.effective.mobile.tasks_dashboard.service.implementations.AuthServiceImpl;
 
 import java.util.Map;

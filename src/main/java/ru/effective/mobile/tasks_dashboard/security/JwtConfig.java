@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import ru.effective.mobile.tasks_dashboard.exception.AccessRefusedException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;

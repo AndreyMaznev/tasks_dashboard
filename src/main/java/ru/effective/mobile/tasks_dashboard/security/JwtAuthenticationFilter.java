@@ -41,9 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             String token = extractTokenFromRequest(request);
-
             if (token != null && jwtConfig.validateAccessToken(token)) {
-
                 String email = jwtConfig.getEmailFromToken(token, jwtConfig.getAccessKey());
                 List<String> roles = jwtConfig.getRolesFromToken(token);
 
@@ -58,7 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         } catch (Exception e) {
-            logger.error("Error during JWT authentication: {}", e.getMessage(), e);
+            logger.error("Произошла ошибка в процессе аутентификации: {}", e.getMessage(), e);
         }
         filterChain.doFilter(request, response);
     }

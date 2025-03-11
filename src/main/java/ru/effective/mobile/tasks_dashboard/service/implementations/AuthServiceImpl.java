@@ -1,13 +1,12 @@
 package ru.effective.mobile.tasks_dashboard.service.implementations;
 
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import ru.effective.mobile.tasks_dashboard.dto.*;
+import ru.effective.mobile.tasks_dashboard.dto.auth.*;
 import ru.effective.mobile.tasks_dashboard.model.User;
 import ru.effective.mobile.tasks_dashboard.security.UserDetailsImpl;
 import ru.effective.mobile.tasks_dashboard.service.interfaces.AuthService;
@@ -27,7 +26,6 @@ public class AuthServiceImpl implements AuthService {
         this.userServiceImpl = userServiceImpl;
         this.authenticationManager = authenticationManager;
     }
-
 
     public RegisterResponse registerWithTokens(RegisterRequest request) {
         User user = userServiceImpl.createUser(new User(request.getEmail(), request.getPassword()));
@@ -57,8 +55,6 @@ public class AuthServiceImpl implements AuthService {
                 .refreshToken(tokenPair.get("refresh_token"))
                 .build();
     }
-
-    //todo убрать дублирование кода для DTOшек
 
     public User authenticate(String email, String password) {
         Authentication authentication = authenticationManager.authenticate(

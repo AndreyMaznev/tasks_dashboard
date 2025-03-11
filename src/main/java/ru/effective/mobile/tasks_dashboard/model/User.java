@@ -1,15 +1,10 @@
 package ru.effective.mobile.tasks_dashboard.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
-
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
+
 
 @Entity
 @Table(name = "users")
@@ -41,11 +36,6 @@ public class User {
     public User(String email, String password) {
         this.email = email;
         this.password = password;
-    }
-
-    //Для всех новых юзеров изначально устанавливаем роль - USER вызовом этого метода
-    public void setDefaultRole (){
-        this.roles.add(Role.ROLE_USER);
     }
 
     @Override

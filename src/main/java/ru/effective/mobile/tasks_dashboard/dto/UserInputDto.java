@@ -1,8 +1,6 @@
 package ru.effective.mobile.tasks_dashboard.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 @Getter
@@ -12,5 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class UserInputDto {
+
+    @Schema(description = "Email пользователя.", example = "user@example.com")
     private String email;
 }
