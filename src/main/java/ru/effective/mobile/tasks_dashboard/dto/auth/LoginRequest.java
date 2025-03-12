@@ -3,11 +3,13 @@ package ru.effective.mobile.tasks_dashboard.dto.auth;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
 public class LoginRequest {
 
     @Schema(description = "Email пользователя.", example = "user@ya.ru")

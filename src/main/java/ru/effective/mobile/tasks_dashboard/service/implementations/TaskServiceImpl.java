@@ -76,7 +76,6 @@ public class TaskServiceImpl implements TaskService {
 
     @Transactional
     @CachePut(value = "tasks", key = "#result.id")
-//    @CacheEvict(value = "tasks", allEntries = true)
     public TaskOutputDto createTask(TaskInputDto taskInputDto, User currentUser) {
         if (!isCurrentUserAdmin()) {
             throw new AccessRefusedException("Создавать задачи могут только администраторы.");

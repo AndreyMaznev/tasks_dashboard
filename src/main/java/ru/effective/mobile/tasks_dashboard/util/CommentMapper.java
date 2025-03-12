@@ -7,7 +7,7 @@ import ru.effective.mobile.tasks_dashboard.dto.CommentOutputDto;
 import ru.effective.mobile.tasks_dashboard.model.Comment;
 
 
-@Mapper(uses = {UserMapper.class, TaskMapper.class})
+@Mapper(componentModel = "spring", uses = {UserMapper.class, TaskMapper.class})
 public interface CommentMapper {
 
     Comment commentInputDtoToComment(CommentInputDto dto);
