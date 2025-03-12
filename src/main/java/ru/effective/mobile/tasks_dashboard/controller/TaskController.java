@@ -110,7 +110,7 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(commentServiceImpl.createComment(taskId, commentInputDto, getCurrentUser()));
     }
 
-    @PutMapping("/{taskId}/comrrrments/{commentId}")
+    @PutMapping("/{taskId}/comments/{commentId}")
     @Operation(
             summary = "Редактирование комментария, только для администратора.",
             description = "Обновляет текст комментария. Доступно только администратору для четкого хранения истории комментариев. " +
