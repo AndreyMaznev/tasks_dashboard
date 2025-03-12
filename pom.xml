@@ -6,7 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.4.3</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<groupId>ru.effective.mobile</groupId>
 	<artifactId>tasks_dashboard</artifactId>
@@ -106,7 +106,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.30</version> <!-- Убедитесь, что версия актуальна -->
+			<version>1.18.30</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
