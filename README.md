@@ -3,8 +3,8 @@
 Для запуска необходим установленный <b> Docker </b>, все консольные команды выполняются без кавычек:
 1. Выбираем папку, в которую будет клонирован проект, например C:\Users\user
 2. Открываем командную строку вводим команду "cd C:\Users\user"
-3. Вводим следующую команду для клонирования репозитория - "cd git clone https://github.com/AndreyMaznev/tasks_dashboard"
-4. Следующей командой открываем папку с проектом "cd tasks_dashboard"
+3. Клонируем репозиторий - "cd git clone https://github.com/AndreyMaznev/tasks_dashboard"
+4. Открываем папку с проектом "cd tasks_dashboard"
 5. Запускаем сборку проекта "mvn clean package"
 6. Запускаем контейнеры "docker-compose up --build"
 
